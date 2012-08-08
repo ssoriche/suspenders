@@ -2,6 +2,8 @@ module Suspenders
   class AppBuilder < Rails::AppBuilder
     include Suspenders::Actions
 
+    SIMPLECOV_INIT = %{require 'simplecov'\nSimpleCov.start 'rails'\n\n}
+
     def readme
       template 'README.md.erb', 'README.md'
     end
@@ -109,6 +111,7 @@ module Suspenders
     def generate_rspec
       generate 'rspec:install'
       inject_into_file '.rspec', " --drb", :after => '--color'
+      prepend_file 'spec/spec_helper.rb', SIMPLECOV_INIT
       replace_in_file 'spec/spec_helper.rb',
         '# config.mock_with :mocha', 'config.mock_with :mocha'
     end
@@ -120,6 +123,7 @@ module Suspenders
       copy_file 'features_support_env.rb', 'features/support/env.rb',
         :force => true
 
+      prepend_file 'features/support/env.rb', SIMPLECOV_INIT
       if options[:webkit]
         inject_into_file 'features/support/env.rb',
           "\n  Capybara.javascript_driver = :webkit",
